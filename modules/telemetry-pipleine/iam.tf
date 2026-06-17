@@ -172,7 +172,7 @@ resource "aws_iam_policy" "firehose_policy" {
           "s3:PutObject",
           "s3:PutObjectAcl"
         ]
-        Resource = "arn:aws:s3:::${var.analytics_bucket_name}/*"
+        Resource = "arn:aws:s3:::${var.analytics_bucket_name}-${var.environment}/*"
       },
       {
         Effect = "Allow"

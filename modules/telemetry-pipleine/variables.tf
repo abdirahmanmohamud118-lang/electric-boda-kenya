@@ -30,10 +30,7 @@ variable "kinesis_retention_period_hours" {
   default     = 24
 }
 
-variable "kinesis_stream_name" {
-  description = "The name of the Kinesis stream."
-  type        = string
-}
+
 
 variable "analytics_bucket_name" {
   description = "The name of the S3 bucket for long-term telemetry storage"
