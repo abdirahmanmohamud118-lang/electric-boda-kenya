@@ -101,7 +101,7 @@ extended_s3_configuration {
 
 resource "aws_iot_topic_rule" "rule" {
 
-  name        = "${var.project_name}-${var.environment}-iot-telemetry-rule"
+  name        = "${var.project_name}-${var.environment}_iot_telemetry_rule"
   enabled     = true
   sql         = "SELECT * FROM 'boda/+/telemetry'"
   sql_version = "2016-03-23"
@@ -148,3 +148,32 @@ resource "aws_lambda_event_source_mapping" "kinesis_trigger" {
   batch_size        = 100
 }
 
+resource "aws_s3_object" "athena_results" {
+  bucket = aws_s3_bucket.analytics_bucket_name.id
+  key    = "athena-results/"
+}
+
+resource "aws_athena_database" "telemetry_database" {
+  name          = "electric_boda_${var.environment}_telemetry_db"
+  bucket        = aws_s3_bucket.analytics_bucket_name.id
+  force_destroy = true
+}
+
+resource "aws_athena_workgroup" "telemetry_workgroup" {
+  name          = "electric-boda-${var.environment}-athena-workgroup"
+  force_destroy = true
+
+  configuration {
+    enforce_workgroup_configuration    = true
+    publish_cloudwatch_metrics_enabled = true
+    bytes_scanned_cutoff_per_query     = 104857600
+
+    result_configuration {
+      output_location = "s3://${aws_s3_bucket.analytics_bucket_name.id}/${aws_s3_object.athena_results.key}"
+      
+      encryption_configuration {
+        encryption_option = "SSE_S3"
+      }
+    }
+  }
+}
